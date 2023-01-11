@@ -1,4 +1,8 @@
-const venmoNames = Object.keys(venmoNameMap);
+const venmoNames = Object.keys(VenmoNameMap);
+
+function ppp() {
+  Logger.log(SanityChecker.check());
+}
 
 class PaymentLogger {
   constructor() {
@@ -67,9 +71,9 @@ class PaymentLogger {
     this.nameCellMap = this.generateNameCellMap();
     const delinquents = Object.keys(this.nameCellMap);
     let emails = delinquents.map(delinquent => {
-      for (let name in venmoNameMap) {
-        if (delinquent === name || venmoNameMap[name].aliases.includes(delinquent)) {
-          return venmoNameMap[name].email;
+      for (let name in VenmoNameMap) {
+        if (delinquent === name || VenmoNameMap[name].aliases.includes(delinquent)) {
+          return VenmoNameMap[name].email;
         }
       }
     })
@@ -81,7 +85,7 @@ class PaymentLogger {
   // Based on that name, it tries to find a match in the sheet, using the "normal" sheet names people use.
   findCellForName(name) {
     const venmoName = name.trim().toLowerCase();
-    const aliases = venmoNameMap[venmoName]['aliases'];
+    const aliases = VenmoNameMap[venmoName]['aliases'];
     aliases.push(venmoName);
     const matches = [];
 
