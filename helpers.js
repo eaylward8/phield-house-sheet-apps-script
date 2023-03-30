@@ -9,7 +9,8 @@ const DateCells = {
 const SheetNames = {
   signUp: 'Sign-Up Sheet',
   delinquents: 'Delinquents',
-  paymentLog: 'Payment Log'
+  paymentLog: 'Payment Log',
+  commishSignUps: 'Commish Sign-Ups'
 }
 
 class Finder {
@@ -48,6 +49,14 @@ const DailySlots = {
   },
 }
 
+const DailySlotsArr = [
+  DailySlots.monday(),
+  DailySlots.tuesday(),
+  DailySlots.wednesday(),
+  DailySlots.thursday(),
+  DailySlots.friday(),
+]
+
 const DailyWaitlistSlots = {
   monday() {
     return Finder.findNamedRange('monWaitlistSlots').getRange();
@@ -64,4 +73,17 @@ const DailyWaitlistSlots = {
   friday() {
     return Finder.findNamedRange('friWaitlistSlots').getRange();
   },
+}
+
+const CommishSignUps = {
+  // Return array of booleans representing sign-up days for the following week.
+  // E.g., [true, false, true, false, true] would equate to signing up for MWF.
+  for(name) {
+    return Finder
+      .findSheet(SheetNames.commishSignUps)
+      .getNamedRanges()
+      .find(range => range.getName() == `signUpCells${name}`)
+      .getRange()
+      .getValues()[0];
+  }
 }

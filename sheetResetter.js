@@ -55,17 +55,28 @@ class SheetResetter {
   }
 
   static addCommishDefaultDays() {
-    const mb = 'Barsotti';
-    const ea = 'Erik';
+    const commishDays = {
+      'Barsotti': CommishSignUps.for('Barsotti'), // value is array like [true, false, true, false, true]
+      'Erik A': CommishSignUps.for('Erik')
+    };
 
-    // Barsotti defaults
-    DailySlots.monday().getCell(1, 1).setValue(mb)
-    DailySlots.wednesday().getCell(1, 1).setValue(mb)
-    DailySlots.friday().getCell(1, 1).setValue(mb)
+    for (name in commishDays) {
+      commishDays[name].forEach((dayBool, idx) => {
+        if (!dayBool) return;
 
-    // Erik defaults
-    DailySlots.tuesday().getCell(1, 1).setValue(ea)
-    DailySlots.friday().getCell(2, 1).setValue(ea)
+        const dailySlots = DailySlotsArr[idx];
+        let row = 1;
+        let cell = dailySlots.getCell(row, 1);
+
+        // Find next blank cell for that day
+        while (!cell.isBlank()) {
+          cell = dailySlots.getCell(row++, 1);
+        }
+
+        // Once we get to a blank cell, set the name
+        cell.setValue(name);
+      });
+    }
   }
 
   static updateDates() {

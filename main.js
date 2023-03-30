@@ -22,7 +22,18 @@ function shouldLogPayments() {
 
 function shouldSendReminderEmails() {
   const today = new Date;
-  return [1, 2, 3, 4].includes(today.getDay()) && today.getHours() === 17;
+  const day = today.getDay();
+  const hour = today.getHours();
+
+  // Send reminders at 12, 4, and 8pm M-Th
+  if ([1, 2, 3, 4].includes(day) && [12, 16, 20].includes(hour)) {
+    return true;
+  }
+
+  // Send reminders at 12 and 4pm on Friday
+  if ([5].includes(day) && [12, 16].includes(hour)) {
+    return true;
+  }
 }
 
 function doPost(e) {
@@ -62,7 +73,6 @@ function doPost(e) {
     }
 
     if (action === 'logPayments') {
-
       // Don't log payments/clear names on Fridays after 5 - can interfere with sheet reset
       if (shouldLogPayments()) {
         const paymentLogger = new PaymentLogger;
