@@ -16,8 +16,8 @@ class SheetResetter {
         DailyWaitlistSlots[day].call().clearContent();
       }
 
-      this.addCommishDefaultDays();
       this.updateDates();
+      this.addCommishDefaultDays();
     }
 
     Emailer.sendFridayResetEmail(allDelinquents, dryRun);
@@ -60,7 +60,7 @@ class SheetResetter {
       'Erik A': CommishSignUps.for('Erik')
     };
 
-    for (name in commishDays) {
+    for (const name in commishDays) {
       commishDays[name].forEach((dayBool, idx) => {
         if (!dayBool) return;
 
