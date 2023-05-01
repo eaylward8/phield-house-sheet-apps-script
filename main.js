@@ -5,6 +5,31 @@ function generateOutput(status, msg = '') {
   return output;
 }
 
+// Google Cloud Scheduler runs at 5:27pm on Fridays to trigger the sheet reset.
+function shouldResetSheet() {
+  const today = new Date;
+  const dayOfWeek = today.getDay();
+  const hour = today.getHours();
+  const min = today.getMinutes();
+
+  if (dayOfWeek === 5 && hour === 17 && min <= 30) return true;
+
+  return false;
+}
+
+// Google Cloud Scheduler has an additional run at 8:27pm on Fridays that I'm
+// using to clear the "Sheet is live" messages. I would make a separate GCS job,
+// but the free tier is limited to 3 total jobs. So, I'm using the sheet reset job.
+function shouldClearMsgCells() {
+  const today = new Date;
+  const dayOfWeek = today.getDay();
+  const hour = today.getHours();
+
+  if (dayOfWeek === 5 && hour === 20) return true;
+
+  return false;
+}
+
 function shouldLogPayments() {
   const today = new Date;
   const dayOfWeek = today.getDay();
@@ -31,7 +56,7 @@ function shouldSendReminderEmails() {
   }
 
   // Send reminders at 12 and 4pm on Friday
-  if ([5].includes(day) && [12, 16].includes(hour)) {
+  if (day === 5 && [12, 16].includes(hour)) {
     return true;
   }
 }
@@ -68,8 +93,17 @@ function doPost(e) {
   // If we make it here, execute whatever function corresponds to the action
   try {
     if (action === 'resetSheet') {
-      SheetResetter.reset(dryRun);
-      Emailer.emailMe(`${action} succeeded`)
+      if (shouldResetSheet()) {
+        SheetResetter.reset(dryRun);
+        MessageSetter.flashSheetLive();
+        Emailer.emailMe(`${action} succeeded`)
+      }
+
+      // Re-using the 'resetSheet' action for clearing the "Sheet is live" messages
+      // so I don't have to create another GCS job (limit 3 free ones).
+      if (shouldClearMsgCells()) {
+        MessageSetter.clearMessages();
+      }
     }
 
     if (action === 'logPayments') {
@@ -92,3 +126,4 @@ function doPost(e) {
     return generateOutput('error', 'https://youtu.be/dQw4w9WgXcQ');
   }
 }
+
